@@ -4,7 +4,7 @@
 
 angular.module('main', ['ngRoute'])
 
-    .value('DEFAULT_DATA', "{\"id\":null,\"events\":[{\"description\":\"What's for dinner?\",\"options\":[{\"description\":\"Hamburger\",\"weight\":1},{\"description\":\"Pizza\",\"weight\":1}]}]}")
+    .value('DEFAULT_DATA', "{\"id\":null,\"events\":[{\"description\":\"What's for dinner?\",\"options\":[{\"description\":\"Hamburger\",\"weight\":0},{\"description\":\"Pizza\",\"weight\":1}]}]}")
 
     .value('DEFAULT_ADD_STRING', '+ ADD')
 
@@ -34,16 +34,27 @@ angular.module('main', ['ngRoute'])
 
     .service('getRandomElementByWeight', function () {
         return function (array) {
-            if (!Array.isArray(array) || 0 === array.length) return null;
+            if (!Array.isArray(array)) return null;
+            array = array.filter(function (elment) {
+                return elment.weight > 0;
+            })
+            if (0 === array.length) return null;
             if (1 === array.length) return array[0];
             var tempArray = [];
-            array.forEach(function (element) {
-                for (var i = 0; i < element.weight; i++) {
-                    tempArray.push(element);
-                }
-            });
-            var random = Math.floor(Math.random() * tempArray.length);
-            return tempArray[random];
+            var sum = 0;
+            for (var i = 0; i < array.length; i++) {
+                tempArray[i] = sum;
+                sum += array[i].weight;
+            }
+            tempArray.push(sum);
+            var random = Math.random() * sum;
+            // binary search
+            var l = 0, r = tempArray.length - 1, m = Math.floor((l + r) / 2);
+            while (l + 1 < r) {
+                tempArray[m] > random ? (r = m) : (l = m);
+                m = Math.floor((l + r) / 2);
+            }
+            return array[l];
         }
     })
 
@@ -85,7 +96,7 @@ angular.module('main', ['ngRoute'])
 
         $scope.addItem = function () {
             $scope.newItem = $scope.newItem.trim();
-            if ($scope.newItem !== '+' && $scope.newItem !== '') {
+            if ($scope.newItem !== DEFAULT_ADD_STRING && $scope.newItem !== '') {
                 $scope.items.push({
                     description: $scope.newItem,
                     options    : []
@@ -131,7 +142,9 @@ angular.module('main', ['ngRoute'])
 
         $scope.setOptionWeight = function (index, weight) {
             if (10 < weight) weight = 10;
-
+            if (1 > weight) weight = 1;
+            weight = Math.floor(weight);
+            $scope.items[index].weight = weight;
         };
 
         $scope.canAddItem = function () {
@@ -140,7 +153,7 @@ angular.module('main', ['ngRoute'])
 
         $scope.addItem = function () {
             $scope.newItem = $scope.newItem.trim();
-            if ($scope.newItem !== '+' && $scope.newItem !== '') {
+            if ($scope.newItem !== DEFAULT_ADD_STRING && $scope.newItem !== '') {
                 $scope.items.push({
                     description: $scope.newItem,
                     weight     : 1
@@ -156,7 +169,6 @@ angular.module('main', ['ngRoute'])
 
         $scope.inputOnKeypress = function ($event) {
             if ($event.keyCode === 13) {
-                $scope.addItem();
                 $event.target.blur();
             }
         };
