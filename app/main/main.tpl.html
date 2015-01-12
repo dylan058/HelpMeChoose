@@ -1,5 +1,6 @@
-<a href="#/" ng-show="isEvent()">B</a>
+<a href="#/" ng-if="undefined !== eventIndex">B</a>
 <h1>{{ description }}</h1>
+<ng-include src="undefined !== eventIndex && 'main/generator.tpl.html'"></ng-include>
 <ul>
     <li ng-repeat="item in items" ng-switch="undefined !== eventIndex">
         <span ng-switch-when="true">{{ item.weight }}</span>
@@ -7,6 +8,6 @@
         <a href="javascript:void(0)" ng-switch-when="true">{{ item.description }}</a>
         <button ng-click="removeItem($index)">D</button>
     </li>
-    <li><input type="text" ng-blur="addItem()" ng-keypress="inputOnKeypress($event)" ng-focus="inputOnFocus()" ng-model="newItem"></li>
 </ul>
+<input type="text" ng-show="canAddItem()" ng-blur="addItem()" ng-keypress="inputOnKeypress($event)" ng-focus="inputOnFocus()" ng-model="newItem">
 <button ng-click="reset()" ng-if="undefined === eventIndex">R</button>
