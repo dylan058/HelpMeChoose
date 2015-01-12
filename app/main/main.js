@@ -4,7 +4,9 @@
 
 angular.module('main', ['ngRoute'])
 
-    .value('DEFAULT_DATA', "{\"id\":null,\"events\":[{\"description\":\"What's for dinner?\",\"options\":[{\"description\":\"Hamburger\",\"weight\":1.2},{\"description\":\"Pizza\",\"weight\":1.2}]}]}")
+    .value('DEFAULT_DATA', "{\"id\":null,\"events\":[{\"description\":\"What's for dinner?\",\"options\":[{\"description\":\"Hamburger\",\"weight\":1},{\"description\":\"Pizza\",\"weight\":1}]}]}")
+
+    .value('DEFAULT_ADD_STRING', '+ ADD')
 
     .service('Data', function (DEFAULT_DATA) {
         var Data = {};
@@ -30,6 +32,21 @@ angular.module('main', ['ngRoute'])
         return Data;
     })
 
+    .service('getRandomElementByWeight', function () {
+        return function (array) {
+            if (!Array.isArray(array) || 0 === array.length) return null;
+            if (1 === array.length) return array[0];
+            var tempArray = [];
+            array.forEach(function (element) {
+                for (var i = 0; i < element.weight; i++) {
+                    tempArray.push(element);
+                }
+            });
+            var random = Math.floor(Math.random() * tempArray.length);
+            return tempArray[random];
+        }
+    })
+
     .config(function ($routeProvider) {
         $routeProvider
             .when('/', {
@@ -45,11 +62,11 @@ angular.module('main', ['ngRoute'])
             });
     })
 
-    .controller('MainCtrl', function ($scope, $location, Data) {
+    .controller('MainCtrl', function ($scope, $location, Data, DEFAULT_ADD_STRING) {
         $scope.data = Data.data;
         $scope.description = 'Help Me Choose';
         $scope.items = $scope.data.events;
-        $scope.newItem = '+';
+        $scope.newItem = DEFAULT_ADD_STRING;
 
         $scope.removeItem = function (index) {
             $scope.items.splice(index, 1);
@@ -62,6 +79,10 @@ angular.module('main', ['ngRoute'])
             $scope.items = $scope.data.events;
         };
 
+        $scope.canAddItem = function () {
+            return 10 >= $scope.items.length;
+        }
+
         $scope.addItem = function () {
             $scope.newItem = $scope.newItem.trim();
             if ($scope.newItem !== '+' && $scope.newItem !== '') {
@@ -71,28 +92,29 @@ angular.module('main', ['ngRoute'])
                 });
                 Data.save();
             }
-            $scope.newItem = '+';
+            $scope.newItem = DEFAULT_ADD_STRING;
             $location.path('/event/' + ($scope.items.length - 1));
-        }
+        };
 
         $scope.inputOnFocus = function () {
             $scope.newItem = '';
-        }
+        };
 
         $scope.inputOnKeypress = function ($event) {
-            if ($event.keyCode === 13) {
+            if (13 === $event.keyCode) {
                 $scope.addItem();
                 $event.target.blur();
             }
         }
     })
 
-    .controller('EventCtrl', function ($scope, $routeParams, Data) {
+    .controller('EventCtrl', function ($scope, $routeParams, Data, DEFAULT_ADD_STRING, getRandomElementByWeight) {
         $scope.eventIndex = $routeParams.eventIndex;
         $scope.event = Data.data.events[$scope.eventIndex];
         $scope.description = $scope.event.description;
         $scope.items = $scope.event.options;
-        $scope.newItem = '+';
+        $scope.newItem = DEFAULT_ADD_STRING;
+        $scope.result = null;
 
         $scope.addOption = function (option) {
 
@@ -108,7 +130,12 @@ angular.module('main', ['ngRoute'])
         };
 
         $scope.setOptionWeight = function (index, weight) {
+            if (10 < weight) weight = 10;
 
+        };
+
+        $scope.canAddItem = function () {
+            return 10 >= $scope.items.length;
         }
 
         $scope.addItem = function () {
@@ -116,21 +143,30 @@ angular.module('main', ['ngRoute'])
             if ($scope.newItem !== '+' && $scope.newItem !== '') {
                 $scope.items.push({
                     description: $scope.newItem,
-                    weight: 1
+                    weight     : 1
                 });
                 Data.save();
             }
-            $scope.newItem = '+';
-        }
+            $scope.newItem = DEFAULT_ADD_STRING;
+        };
 
         $scope.inputOnFocus = function () {
             $scope.newItem = '';
-        }
+        };
 
         $scope.inputOnKeypress = function ($event) {
             if ($event.keyCode === 13) {
                 $scope.addItem();
                 $event.target.blur();
             }
+        };
+
+        $scope.generateResult = function () {
+            // TODO
+            $scope.result = getRandomElementByWeight($scope.items);
+        }
+
+        $scope.clearResult = function () {
+            $scope.result = null;
         }
     });
