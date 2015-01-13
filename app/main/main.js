@@ -2,7 +2,7 @@
  * Created by Dylan on 15/1/11.
  */
 
-angular.module('main', ['ngRoute'])
+angular.module('main', ['ngRoute', 'ui.slider'])
 
     .value('DEFAULT_DATA', "{\"id\":null,\"events\":[{\"description\":\"What's for dinner?\",\"options\":[{\"description\":\"Hamburger\",\"weight\":0},{\"description\":\"Pizza\",\"weight\":1}]}]}")
 
@@ -140,12 +140,15 @@ angular.module('main', ['ngRoute'])
 
         };
 
-        $scope.setOptionWeight = function (index, weight) {
-            if (10 < weight) weight = 10;
-            if (1 > weight) weight = 1;
-            weight = Math.floor(weight);
-            $scope.items[index].weight = weight;
-        };
+        $scope.setOptionWeight = function (index) {
+            return function (weight) {
+                if (10 < weight) weight = 10;
+                if (1 > weight) weight = 1;
+                weight = Math.floor(weight);
+                $scope.items[index].weight = weight;
+                Data.save();
+            }
+        }
 
         $scope.canAddItem = function () {
             return 10 >= $scope.items.length;

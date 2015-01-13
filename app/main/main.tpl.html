@@ -4,10 +4,14 @@
 <ul>
     <li ng-repeat="item in items" ng-switch="undefined !== eventIndex">
         <span ng-switch-when="true">{{ item.weight }}</span>
+        <slider floor="1" ceiling="10" step="1" precision="2" ng-model="item.weight"
+                ng-end="setOptionWeight($index)"></slider>
         <a href="#/event/{{ $index }}" ng-switch-when="false">{{ item.description }}</a>
         <a href="javascript:void(0)" ng-switch-when="true">{{ item.description }}</a>
         <button ng-click="removeItem($index)">D</button>
     </li>
 </ul>
-<input type="text" ng-show="canAddItem()" ng-blur="addItem()" ng-keypress="inputOnKeypress($event)" ng-focus="inputOnFocus()" ng-model="newItem">
+<input type="text" ng-show="canAddItem()" ng-blur="addItem()" ng-keypress="inputOnKeypress($event)"
+       ng-focus="inputOnFocus()" ng-model="newItem">
 <button ng-click="reset()" ng-if="undefined === eventIndex">R</button>
+
