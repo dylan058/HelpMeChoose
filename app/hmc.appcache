@@ -1,0 +1,19 @@
+CACHE MANIFEST
+./index.html
+./main/main.js
+./main/main.tpl.html
+./main/generator.tpl.html
+./vendor/edgefonts/fonts.css
+./vendor/angular/angular.min.js
+./vendor/angular/angular-animate.min.js
+./vendor/angular/angular-resource.min.js
+./vendor/angular/angular-route.min.js
+./vendor/angular/angular-touch.min.js
+./vendor/angular-slider/slider.css
+./vendor/angular-slider/slider.js
+./vendor/flat-ui/icons.css
+
+NETWORK:
+*
+
+FALLBACK:

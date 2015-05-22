@@ -1,17 +1,25 @@
-<a href="#/" ng-if="undefined !== eventIndex">B</a>
-<h1>{{ description }}</h1>
-<ng-include src="undefined !== eventIndex && 'main/generator.tpl.html'"></ng-include>
+<a class="back" href="#/" ng-if="undefined !== eventIndex"><span class="fui-arrow-left"></span></a>
+<h1 ng-class="undefined !== eventIndex && 'event-title'">{{ description }}</h1>
+<ng-include src="undefined !== eventIndex && items.length > 0 && 'main/generator.tpl.html'"></ng-include>
+<input class="text-input" ng-class="items.length == 0 ? 'single-input' : ''" type="text" ng-show="canAddItem()"
+       ng-blur="addItem()" ng-keypress="inputOnKeypress($event)"
+       ng-focus="inputOnFocus()" ng-model="newItem">
 <ul>
-    <li ng-repeat="item in items" ng-switch="undefined !== eventIndex">
-        <span ng-switch-when="true">{{ item.weight }}</span>
-        <slider floor="1" ceiling="10" step="1" precision="2" ng-model="item.weight"
-                ng-end="setOptionWeight($index)"></slider>
-        <a href="#/event/{{ $index }}" ng-switch-when="false">{{ item.description }}</a>
-        <a href="javascript:void(0)" ng-switch-when="true">{{ item.description }}</a>
-        <button ng-click="removeItem($index)">D</button>
+    <li class="item" ng-init="li.position = ''" ng-class="li.position" ng-repeat="item in items"
+        ng-switch="undefined !== eventIndex">
+        <span class="slider-container" ng-switch-when="true">
+            <span>{{ item.weight }}</span>
+            <slider floor="1" ceiling="10" step="1" precision="2" ng-model="item.weight"
+                    ng-end="item.$setWeight"></slider>
+        </span>
+        <button class="description extra-margin" ng-switch-when="false"
+           ng-swipe-left="li.position = 'slide-left'" ng-swipe-right="li.position = ''"
+           ng-touch="onClick(li, $index)" ng-click="onClick(li, $index)">{{ item.description}}</button>
+        <button class="description" href="javascript:void(0)" ng-switch-when="true"
+                ng-swipe-left="swipeLeft(li)" ng-swipe-right="swipeRight(li)"
+                ng-touch="li.position = ''" ng-click="li.position = ''">{{ item.description }}</button>
+        <button class="btn del-btn" ng-click="removeItem($index)">Delete</button>
     </li>
 </ul>
-<input type="text" ng-show="canAddItem()" ng-blur="addItem()" ng-keypress="inputOnKeypress($event)"
-       ng-focus="inputOnFocus()" ng-model="newItem">
-<button ng-click="reset()" ng-if="undefined === eventIndex">R</button>
+<button class="reset-button" ng-click="reset()" ng-if="undefined === eventIndex">Reset Data</button>
 

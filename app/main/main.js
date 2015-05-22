@@ -2,11 +2,11 @@
  * Created by Dylan on 15/1/11.
  */
 
-angular.module('main', ['ngRoute', 'ui.slider'])
+angular.module('main', ['ngRoute', 'ngTouch', 'ngAnimate', 'ui.slider'])
 
-    .value('DEFAULT_DATA', "{\"id\":null,\"events\":[{\"description\":\"What's for dinner?\",\"options\":[{\"description\":\"Hamburger\",\"weight\":0},{\"description\":\"Pizza\",\"weight\":1}]}]}")
+    .value('DEFAULT_DATA', "{\"id\":null,\"events\":[{\"description\":\"What's for dinner?\",\"options\":[{\"description\":\"Hamburger\",\"weight\":1},{\"description\":\"Pizza\",\"weight\":1}]}]}")
 
-    .value('DEFAULT_ADD_STRING', '+ ADD')
+    .value('DEFAULT_ADD_STRING', 'Tap to Add')
 
     .service('Data', function (DEFAULT_DATA) {
         var Data = {};
@@ -16,8 +16,11 @@ angular.module('main', ['ngRoute', 'ui.slider'])
         };
 
         Data.reset = function () {
-            Data.data = angular.fromJson(DEFAULT_DATA);
-            localStorage.data = DEFAULT_DATA;
+            var result = window.confirm('Do you really want to reset your data? It is irreversible.');
+            if (result) {
+                Data.data = angular.fromJson(DEFAULT_DATA);
+                localStorage.data = DEFAULT_DATA;
+            }
         };
 
         if (localStorage.data && localStorage.data.length > 0) {
@@ -37,7 +40,7 @@ angular.module('main', ['ngRoute', 'ui.slider'])
             if (!Array.isArray(array)) return null;
             array = array.filter(function (elment) {
                 return elment.weight > 0;
-            })
+            });
             if (0 === array.length) return null;
             if (1 === array.length) return array[0];
             var tempArray = [];
@@ -92,19 +95,19 @@ angular.module('main', ['ngRoute', 'ui.slider'])
 
         $scope.canAddItem = function () {
             return 10 >= $scope.items.length;
-        }
+        };
 
         $scope.addItem = function () {
             $scope.newItem = $scope.newItem.trim();
             if ($scope.newItem !== DEFAULT_ADD_STRING && $scope.newItem !== '') {
-                $scope.items.push({
+                $scope.items.unshift({
                     description: $scope.newItem,
                     options    : []
                 });
                 Data.save();
+                $location.path('/event/0');
             }
             $scope.newItem = DEFAULT_ADD_STRING;
-            $location.path('/event/' + ($scope.items.length - 1));
         };
 
         $scope.inputOnFocus = function () {
@@ -116,6 +119,10 @@ angular.module('main', ['ngRoute', 'ui.slider'])
                 $scope.addItem();
                 $event.target.blur();
             }
+        };
+
+        $scope.onClick = function (obj, $index) {
+            obj.position !== '' ? (obj.position = '') : $location.path('/event/' + $index);
         }
     })
 
@@ -127,9 +134,15 @@ angular.module('main', ['ngRoute', 'ui.slider'])
         $scope.newItem = DEFAULT_ADD_STRING;
         $scope.result = null;
 
-        $scope.addOption = function (option) {
-
-        };
+        $scope.items.forEach(function (element) {
+            element.$setWeight = function (weight) {
+                if (10 < weight) weight = 10;
+                if (1 > weight) weight = 1;
+                weight = Math.floor(weight);
+                element.weight = weight;
+                Data.save();
+            }
+        });
 
         $scope.removeItem = function (index) {
             $scope.items.splice(index, 1);
@@ -140,26 +153,23 @@ angular.module('main', ['ngRoute', 'ui.slider'])
 
         };
 
-        $scope.setOptionWeight = function (index) {
-            return function (weight) {
-                if (10 < weight) weight = 10;
-                if (1 > weight) weight = 1;
-                weight = Math.floor(weight);
-                $scope.items[index].weight = weight;
-                Data.save();
-            }
-        }
-
         $scope.canAddItem = function () {
             return 10 >= $scope.items.length;
-        }
+        };
 
         $scope.addItem = function () {
             $scope.newItem = $scope.newItem.trim();
             if ($scope.newItem !== DEFAULT_ADD_STRING && $scope.newItem !== '') {
-                $scope.items.push({
+                $scope.items.unshift({
                     description: $scope.newItem,
-                    weight     : 1
+                    weight     : 1,
+                    $setWeight : function (weight) {
+                        if (10 < weight) weight = 10;
+                        if (1 > weight) weight = 1;
+                        weight = Math.floor(weight);
+                        this.weight = weight;
+                        Data.save();
+                    }
                 });
                 Data.save();
             }
@@ -178,10 +188,34 @@ angular.module('main', ['ngRoute', 'ui.slider'])
 
         $scope.generateResult = function () {
             // TODO
-            $scope.result = getRandomElementByWeight($scope.items);
-        }
+            $scope.result = null;
+            setTimeout(function() {
+                $scope.result = getRandomElementByWeight($scope.items);
+                $scope.$apply();
+            }, 500);
+        };
 
         $scope.clearResult = function () {
             $scope.result = null;
+        };
+
+        $scope.swipeLeft = function (obj) {
+            switch (obj.position) {
+                case 'slide-right':
+                    obj.position = '';
+                    break;
+                case '':
+                    obj.position = 'slide-left';
+            }
+        };
+
+        $scope.swipeRight = function (obj) {
+            switch (obj.position) {
+                case 'slide-left':
+                    obj.position = '';
+                    break;
+                case '':
+                    obj.position = 'slide-right';
+            }
         }
     });

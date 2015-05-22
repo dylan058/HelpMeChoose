@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html ng-app="main">
+<html ng-app="main" manifest="hmc.appcache">
 <head lang="en">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="vendor/angular/angular.js"></script>
-    <script src="vendor/angular/angular-resource.js"></script>
-    <script src="vendor/angular/angular-route.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="vendor/angular/angular.min.js"></script>
+    <script src="vendor/angular/angular-resource.min.js"></script>
+    <script src="vendor/angular/angular-route.min.js"></script>
+    <script src="vendor/angular/angular-touch.min.js"></script>
+    <script src="vendor/angular/angular-animate.min.js"></script>
     <script src="vendor/angular-slider/slider.js"></script>
     <script src="main/main.js"></script>
+    <link href="vendor/flat-ui/icons.css" type="text/css" rel="stylesheet">
     <link href="vendor/angular-slider/slider.css" type="text/css" rel="stylesheet">
     <link href="assets/css/style.css" type="text/css" rel="stylesheet">
-    <title></title>
+    <link href="vendor/edgefonts/fonts.css" type="text/css" rel="stylesheet">
+    <title>Help Me Choose</title>
 </head>
 <body>
 <div ng-view></div>

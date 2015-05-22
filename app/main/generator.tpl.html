@@ -1,3 +1,3 @@
-<div ng-if="null !== result">{{ result.description }}</div>
-<button ng-click="generateResult()">G</button>
-<button ng-click="clearResult()" ng-if="null !== result">O</button>
+<div class="result" ng-if="null !== result">{{ result.description }}</div>
+<button class="clear-button" ng-click="generateResult()">Help me!</button>
+<button class="clear-button" ng-click="clearResult()" ng-if="null !== result">Get it!</button>
