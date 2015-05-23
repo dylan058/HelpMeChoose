@@ -1,0 +1,4 @@
+<button class="reset-button" ng-click="reset()">Reset Data</button>
+<button class="reset-button" ng-click="upload()" ng-disabled="dataTransfering">Upload Data</button>
+<button class="reset-button" ng-click="download()" ng-disabled="dataTransfering">Download Data</button>
+<div class="uid" ng-if="undefined !== uid && null !== uid">Data ID: {{ uid }}</div>

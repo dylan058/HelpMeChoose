@@ -208,11 +208,11 @@ slider {
 }
 
 .reset-button {
+    float: left;
+    margin: 20px 0 0 0;
     border: none;
-    width: 100%;
+    width: 33.3%;
     height: 60px;
-    border-radius: 5px;
-    margin-top: 20px;
     padding: 0;
     font-family: inherit;
     font-size: 18px;
@@ -225,8 +225,34 @@ slider {
     user-select: none;
 }
 
+.reset-button:first-of-type {
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 5px;
+}
+
+.reset-button:last-of-type {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
 .reset-button:active {
     box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .5), inset -1px -1px 0 rgba(255, 255, 255, .5);
+}
+
+.reset-button:disabled {
+    background-color: #999;
+    animation: button-disabled 3s linear 0s infinite;
+    -webkit-animation: button-disabled 3s linear 0s infinite;
+}
+
+.uid {
+    width: 100%;
+    margin-top: 100px;
+    text-align: center;
+    color: #BDC3C7;
+    text-shadow: 1px 1px 0 #fff;
+    font-size: 18px;
+    font-family: kreon, sans-serif;
 }
 
 .clear-button {
@@ -310,4 +336,16 @@ slider {
     0%      {box-shadow: inset 1px 0 5px #fff;}
     20%     {box-shadow: inset 35px 0 35px -35px #E74C3C;}
     100%    {box-shadow: inset 1px 0 5px #fff;}
+}
+
+@keyframes button-disabled {
+    0%      {background-color: #999}
+    30%     {background-color: #74aedb}
+    100%    {background-color: #999}
+}
+
+@-webkit-keyframes button-disabled {
+    0%      {background-color: #999}
+    50%     {background-color: #74aedb}
+    100%    {background-color: #999}
 }

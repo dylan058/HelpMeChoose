@@ -21,5 +21,4 @@
         <button class="btn del-btn" ng-click="removeItem($index)">Delete</button>
     </li>
 </ul>
-<button class="reset-button" ng-click="reset()" ng-if="undefined === eventIndex">Reset Data</button>
-
+<ng-include src="undefined == eventIndex && 'main/buttons.tpl.html'"></ng-include>

@@ -2,25 +2,75 @@
  * Created by Dylan on 15/1/11.
  */
 
-angular.module('main', ['ngRoute', 'ngTouch', 'ngAnimate', 'ui.slider'])
+angular.module('main', ['ngRoute', 'ngTouch', 'ngAnimate', 'ui.slider', 'firebase'])
 
     .value('DEFAULT_DATA', "{\"id\":null,\"events\":[{\"description\":\"What's for dinner?\",\"options\":[{\"description\":\"Hamburger\",\"weight\":1},{\"description\":\"Pizza\",\"weight\":1}]}]}")
 
     .value('DEFAULT_ADD_STRING', 'Tap to Add')
 
-    .service('Data', function (DEFAULT_DATA) {
+    .service('Data', function (DEFAULT_DATA, $firebaseObject) {
         var Data = {};
+        Data.string = '';
+
 
         Data.save = function () {
-            localStorage.data = angular.toJson(Data.data);
+            Data.string = angular.toJson(Data.data);
+            localStorage.data = Data.string;
         };
 
         Data.reset = function () {
-            var result = window.confirm('Do you really want to reset your data? It is irreversible.');
+            var result = !Data.data || window.confirm('Do you really want to reset your data? It is irreversible.');
             if (result) {
-                Data.data = angular.fromJson(DEFAULT_DATA);
-                localStorage.data = DEFAULT_DATA;
+                Data.string = DEFAULT_DATA;
+                Data.data = angular.fromJson(Data.string);
+                localStorage.data = Data.string;
             }
+        };
+
+        Data.upload = function () {
+            return new Promise(function (resolve, reject) {
+                if (DEFAULT_DATA == Data.string) {
+                    alert('No modified data!')
+                    reject();
+                    return;
+                }
+                var uid = Data.data.id;
+                if (!uid) {
+                    Data.data.id = uid = generateUid(8);
+                }
+                Data.save();
+                var ref = new Firebase('https://resplendent-inferno-8580.firebaseio.com/' + uid);
+                var fbObj = $firebaseObject(ref);
+                fbObj.$value = Data.string;
+                fbObj.$save().then(function () {
+                    alert('Done! Your data id is \'' + uid + '\'.');
+                    resolve();
+                }, function (error) {
+                    reject(error);
+                });
+            });
+        };
+
+        Data.download = function () {
+            return new Promise(function (resolve, reject) {
+                var uid = prompt('What\'s your data id?');
+                if (null != uid && 8 == uid.trim().length) {
+                    var ref = new Firebase('https://resplendent-inferno-8580.firebaseio.com/' + uid);
+                    var fbObj = $firebaseObject(ref);
+                    fbObj.$loaded().then(function (data) {
+                        Data.string = data.$value;
+                        console.log(data);
+                        Data.data = angular.fromJson(Data.string);
+                        localStorage.data = Data.string;
+                        resolve(data);
+                    }).catch(function (error) {
+                        reject(error);
+                    });
+                } else {
+                    if (null != uid) alert('Illegal data id!');
+                    reject();
+                }
+            });
         };
 
         if (localStorage.data && localStorage.data.length > 0) {
@@ -38,8 +88,8 @@ angular.module('main', ['ngRoute', 'ngTouch', 'ngAnimate', 'ui.slider'])
     .service('getRandomElementByWeight', function () {
         return function (array) {
             if (!Array.isArray(array)) return null;
-            array = array.filter(function (elment) {
-                return elment.weight > 0;
+            array = array.filter(function (element) {
+                return element.weight > 0;
             });
             if (0 === array.length) return null;
             if (1 === array.length) return array[0];
@@ -80,6 +130,7 @@ angular.module('main', ['ngRoute', 'ngTouch', 'ngAnimate', 'ui.slider'])
         $scope.data = Data.data;
         $scope.description = 'Help Me Choose';
         $scope.items = $scope.data.events;
+        $scope.uid = $scope.data.id;
         $scope.newItem = DEFAULT_ADD_STRING;
 
         $scope.removeItem = function (index) {
@@ -91,6 +142,44 @@ angular.module('main', ['ngRoute', 'ngTouch', 'ngAnimate', 'ui.slider'])
             Data.reset();
             $scope.data = Data.data;
             $scope.items = $scope.data.events;
+            $scope.uid = $scope.data.id;
+        };
+
+        $scope.upload = function () {
+            $scope.dataTransfering = true;
+            Data.upload().then(function () {
+                $scope.data = Data.data;
+                $scope.items = $scope.data.events;
+                $scope.uid = $scope.data.id;
+                $scope.dataTransfering = false;
+                $scope.$applyAsync();
+            }).catch(function (error) {
+                if (error) {
+                    alert('Error');
+                    console.log(error);
+                }
+                $scope.dataTransfering = false;
+                $scope.$applyAsync();
+            });
+        };
+
+        $scope.download = function () {
+            $scope.dataTransfering = true;
+            Data.download().then(function () {
+                console.log('hello');
+                $scope.data = Data.data;
+                $scope.items = $scope.data.events;
+                $scope.uid = $scope.data.id;
+                $scope.dataTransfering = false;
+                $scope.$applyAsync();
+            }).catch(function (error) {
+                if (error) {
+                    alert('Error!');
+                    console.log(error);
+                }
+                $scope.dataTransfering = false;
+                $scope.$applyAsync();
+            });
         };
 
         $scope.canAddItem = function () {
